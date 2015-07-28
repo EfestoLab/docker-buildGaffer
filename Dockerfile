@@ -1,3 +1,17 @@
+############################################################
+# Dockerfile to build gafferDependencies
+# Based on centos6
+
+# BUILD WITH : sudo docker build -t <your_namespace>/gafferDependencies .
+# RUN WITH: docker run --rm -it -v `pwd`/volume:/vfxlib <your_namespace>/gafferDependencies
+# All the libraries will be then available in ./volume
+
+# maintained by
+# http://www.efestolab.uk
+# for informations : info@efestolab.uk
+
+# BASED ON GAFFER 0.15.0
+
 # Python-2.7.5
 # subprocess32-3.2.6
 # boost_1_51_0
@@ -363,3 +377,50 @@ RUN cd /tmp &&\
     make install &&\
     mv $BUILD_DIR/alembic-*/include/* $BUILD_DIR/include &&\
     mv $BUILD_DIR/alembic-*/lib/static/* $BUILD_DIR/lib
+
+#----------------------------------------------
+# build and install xerces
+#----------------------------------------------
+RUN wget https://www.apache.org/dist/xerces/c/3/sources/xerces-c-3.1.2.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/xerces-c-3.1.2.tar.gz &&\
+    cd xerces-c-3.1.2 &&\
+    ./configure \
+        --prefix=$BUILD_DIR &&\
+    make -j ${BUILD_PROCS} &&\
+    make install
+
+#----------------------------------------------
+# build and install appleseed
+#----------------------------------------------
+RUN wget https://github.com/appleseedhq/appleseed/archive/1.2.0-beta.zip -P /tmp
+RUN cd /tmp &&\
+    unzip /tmp/1.2.0-beta.zip -d /tmp &&\
+    cd appleseed-1.2.0-beta &&\
+    mkdir -p sandbox/bin &&\
+    mkdir -p sandbox/schemas &&\
+    mkdir -p build &&\
+    cd build &&\
+    rm -f CMakeCache.txt &&\
+    cmake \
+        -D WITH_CLI=ON \
+        -D WITH_STUDIO=OFF \
+        -D WITH_TOOLS=OFF \
+        -D WITH_PYTHON=ON \
+        -D WITH_OSL=ON \
+        -D USE_STATIC_BOOST=OFF \
+        -D USE_STATIC_OIIO=OFF \
+        -D USE_STATIC_OSL=OFF \
+        -D USE_EXTERNAL_ZLIB=ON \
+        -D USE_EXTERNAL_EXR=ON \
+        -D USE_EXTERNAL_PNG=ON \
+        -D USE_EXTERNAL_XERCES=ON \
+        -D USE_EXTERNAL_OSL=ON \
+        -D USE_EXTERNAL_OIIO=ON \
+        -D USE_EXTERNAL_ALEMBIC=ON \
+        -D CMAKE_PREFIX_PATH=$BUILD_DIR \
+        -D CMAKE_INSTALL_PREFIX=$BUILD_DIR/appleseed \
+        .. &&\
+    make clean &&\
+    make -j ${BUILD_PROCS} &&\
+    make install
