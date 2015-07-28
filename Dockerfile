@@ -42,6 +42,10 @@
 # https://github.com/danbethell/vfxbits/blob/master/cortex/download.bash
 # https://github.com/johnhaddon/gafferDependencies/tree/master/build
 
+# NOTE:
+# The build take long time, and around 4Gb of space.
+# If the build hangs or crash try to lower BUILD_PROCS variable
+
 FROM centos:6
 MAINTAINER Efesto Lab LTD version: 0.1
 
@@ -435,6 +439,9 @@ RUN cd /tmp &&\
 #----------------------------------------------
 # build and install cortex
 #----------------------------------------------
+# TODO : Fix DELIGHT
+# TODO : Fix ARNOLD_ROOT
+
 RUN git clone https://github.com/ImageEngine/cortex.git /tmp/cortex &&\
     cd /tmp/cortex &&\
     git checkout 9.0.0-b9
@@ -515,15 +522,13 @@ RUN cd /tmp && \
 #----------------------------------------------
 
 RUN wget http://download.qt-project.org/official_releases/pyside/pyside-qt4.8+1.2.2.tar.bz2 -P /tmp &&\
-    wget http://download.qt-project.org/official_releases/pyside/shiboken-1.2.2.tar.bz2 -P /tmp &&\
-    wget https://github.com/PySide/Tools/archive/0.2.15.tar.gz -P /tmp;
+    wget http://download.qt-project.org/official_releases/pyside/shiboken-1.2.2.tar.bz2 -P /tmp
 
 ENV PYTHON_VERSION 2.7
 
 RUN cd /tmp &&\
     tar -jxvf /tmp/pyside-qt4.8+1.2.2.tar.bz2 &&\
-    tar -jxvf /tmp/shiboken-1.2.2.tar.bz2  &&\
-    tar -zxvf /tmp/0.2.15.tar.gz &&\
+    tar -jxvf /tmp/shiboken-1.2.2.tar.bz2 &&\
     cd /tmp/shiboken-1.2.2 &&\
     rm -f build &&\
     mkdir build &&\
@@ -539,6 +544,7 @@ RUN cd /tmp &&\
     make VERBOSE=1 -j ${BUILD_PROCS} &&\
     make install &&\
     cd /tmp/pyside-qt4.8+1.2.2 &&\
+    rm -f build &&\
     mkdir build &&\
     cd build &&\
     cmake \
@@ -550,3 +556,20 @@ RUN cd /tmp &&\
     make clean && \
     make VERBOSE=1 -j ${BUILD_PROCS} &&\
     make install.
+
+
+#----------------------------------------------
+# build and install Gaffer
+#----------------------------------------------
+RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer
+    cd /tmp/gaffer &&\
+    git checkout 0.15.0.0 &&\
+    scons BUILD_DIR=<BUILD_DIR> build
+
+
+#----------------------------------------------
+# prepare the output
+#----------------------------------------------
+RUN chown -R vfx:vfx /opt
+VOLUME /$OUT_FOLDER
+CMD cp -Rf -v /opt/* /$OUT_FOLDER && bash
