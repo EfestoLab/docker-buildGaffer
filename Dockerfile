@@ -468,3 +468,20 @@ RUN cd /tmp/cortex &&\
         ENV_VARS_TO_IMPORT=LD_LIBRARY_PATH \
         OPTIONS='' \
         SAVE_OPTIONS=gaffer.options
+
+
+#----------------------------------------------
+# build and install PyOpenGL
+#----------------------------------------------
+
+ENV LD_LIBRARY_PATH $BUILD_DIR/lib
+ENV DYLD_FRAMEWORK_PATH $BUILD_DIR/lib
+
+RUN wget https://pypi.python.org/packages/source/P/PyOpenGL/PyOpenGL-3.0.2.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/PyOpenGL-3.0.2.tar.gz &&\
+    cd PyOpenGL-3.0.2 &&\
+    $BUILD_DIR/bin/python setup.py install \
+        --prefix $BUILD_DIR \
+        --install-lib $BUILD_DIR/python
+
