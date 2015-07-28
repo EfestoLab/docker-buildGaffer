@@ -300,7 +300,7 @@ RUN cd /tmp &&\
 #----------------------------------------------
 # build and install OSL
 #----------------------------------------------
-RUN wget -c https://github.com/imageworks/OpenShadingLanguage/archive/Release-1.6.8.tar.gz -P /tmp
+RUN wget https://github.com/imageworks/OpenShadingLanguage/archive/Release-1.6.8.tar.gz -P /tmp
 ENV DYLD_LIBRARY_PATH $BUILD_DIR/lib
 ENV LD_LIBRARY_PATH $BUILD_DIR/lib
 RUN cd /tmp &&\
@@ -318,5 +318,48 @@ RUN cd /tmp &&\
     make && \
     make install
 
+#----------------------------------------------
+# build and install hdf5
+#----------------------------------------------
+RUN wget https://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.11/src/hdf5-1.8.11.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/hdf5-1.8.11.tar.gz &&\
+    cd hdf5-1.8.11 &&\
+    ./configure \
+        --prefix=$BUILD_DIR \
+        --enable-threadsafe \
+        --with-pthread=/usr/include &&\
+     make clean && \
+     make -j ${BUILD_PROCS} && \
+     make install
 
+#----------------------------------------------
+# build and install alembic
+#----------------------------------------------
+# https://code.google.com/p/alembic/issues/detail?id=343
 
+RUN wget https://github.com/alembic/alembic/archive/1.5.8.zip -P /tmp
+RUN cd /tmp &&\
+    unzip /tmp/1.5.8.zip -d /tmp &&\
+    cd alembic-1.5.8 &&\
+    sed -i '/SET( Boost_USE_STATIC_LIBS TRUE )/d' build/AlembicBoost.cmake &&\
+    sed -i 's/SET( ALEMBIC_GL_LIBS GLEW ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )/FIND_PACKAGE( GLEW )\n SET( ALEMBIC_GL_LIBS ${GLEW_LIBRARY} ${GLUT_LIBRARY} ${OPENGL_LIBRARIES} )/g' CMakeLists.txt &&\
+    rm -f CMakeCache.txt &&\
+    cmake \
+        -D CMAKE_INSTALL_PREFIX=$BUILD_DIR \
+        -D CMAKE_PREFIX_PATH=$BUILD_DIR \
+        -D Boost_NO_SYSTEM_PATHS=TRUE \
+        -D Boost_NO_BOOST_CMAKE=TRUE \
+        -D BOOST_ROOT=$BUILD_DIR \
+        -D ILMBASE_ROOT=$BUILD_DIR \
+        -D USE_PYILMBASE=FALSE \
+        -D USE_PYALEMBIC=FALSE \
+        -D USE_ARNOLD=FALSE \
+        -D USE_PRMAN=FALSE \
+        -D USE_MAYA=FALSE \
+        . &&\
+    make clean &&\
+    make -j ${BUILD_PROCS} &&\
+    make install &&\
+    mv $BUILD_DIR/alembic-*/include/* $BUILD_DIR/include &&\
+    mv $BUILD_DIR/alembic-*/lib/static/* $BUILD_DIR/lib
