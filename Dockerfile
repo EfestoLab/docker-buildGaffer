@@ -23,8 +23,6 @@
 # qt-everywhere-opensource-src-4.8.5
 # shiboken-1.2.2
 # pyside-qt4.8+1.2.2
-# imageworks-OpenColorIO-8883824
-# imageworks-OpenColorIO-Configs-f931d77
 
 FROM centos:6
 MAINTAINER Efesto Lab LTD version: 0.1
@@ -254,3 +252,25 @@ RUN mkdir -p $BUILD_DIR/openColorIO &&\
     cd /tmp/OpenColorIO-Configs-1.0_r2 &&\
     cp nuke-default/config.ocio $BUILD_DIR/openColorIO &&\
     cp -r nuke-default/luts $BUILD_DIR/openColorIO;
+
+#----------------------------------------------
+# build and install OIIO
+#----------------------------------------------
+RUN wget https://github.com/OpenImageIO/oiio/archive/Release-1.5.17.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/Release-1.5.17.tar.gz &&\
+    cd oiio-Release-1.5.17 &&\
+    mkdir -p gafferBuild &&\
+    cd gafferBuild &&\
+    rm -f CMakeCache.txt &&\
+    cmake \
+        -D CMAKE_INSTALL_PREFIX=$BUILD_DIR \
+        -D CMAKE_PREFIX_PATH=$BUILD_DIR \
+        .. &&\
+    make && \
+    make install
+
+
+
+
+
