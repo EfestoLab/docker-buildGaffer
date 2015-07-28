@@ -38,6 +38,10 @@
 # shiboken-1.2.2
 # pyside-qt4.8+1.2.2
 
+# references used for the build:
+# https://github.com/danbethell/vfxbits/blob/master/cortex/download.bash
+# https://github.com/johnhaddon/gafferDependencies/tree/master/build
+
 FROM centos:6
 MAINTAINER Efesto Lab LTD version: 0.1
 
@@ -103,6 +107,7 @@ RUN cd /tmp && \
 #----------------------------------------------
 # build and install boost
 #----------------------------------------------
+# Isn't DYNLIB just for macos ?
 ENV DYLD_FALLBACK_FRAMEWORK_PATH=$BUILD_DIR/lib
 RUN wget http://downloads.sourceforge.net/project/boost/boost/1.51.0/boost_1_51_0.tar.bz2 -P /tmp
 RUN cd /tmp &&\
@@ -351,7 +356,8 @@ RUN cd /tmp &&\
 #----------------------------------------------
 # build and install alembic
 #----------------------------------------------
-# https://code.google.com/p/alembic/issues/detail?id=343
+# P1: https://github.com/johnhaddon/gafferDependencies/blob/master/build/buildAlembic.sh
+# P2: https://code.google.com/p/alembic/issues/detail?id=343
 
 RUN wget https://github.com/alembic/alembic/archive/1.5.8.zip -P /tmp
 RUN cd /tmp &&\
@@ -485,3 +491,62 @@ RUN cd /tmp &&\
         --prefix $BUILD_DIR \
         --install-lib $BUILD_DIR/python
 
+
+#----------------------------------------------
+# build and install Qt
+#----------------------------------------------
+RUN wget http://download.qt.io/archive/qt/4.8/4.8.5/qt-everywhere-opensource-src-4.8.5.tar.gz -P /tmp ;
+RUN cd /tmp && \
+    tar -zxvf qt-everywhere-opensource-src-4.8.5.tar.gz && \
+    cd qt-everywhere-opensource-src-4.8.5 && \
+    ./configure \
+        -prefix $BUILD_DIR \
+        -opensource -confirm-license \
+        -no-rpath -no-declarative -no-gtkstyle -no-qt3support \
+        -no-multimedia -no-audio-backend -no-webkit -no-script -no-dbus -no-declarative -no-svg \
+        -nomake examples -nomake demos -nomake tools \
+        -I $BUILD_DIR/include -L $BUILD_DIR/lib &&\
+    make -j ${BUILD_PROCS} && \
+    make install
+
+
+#----------------------------------------------
+# build and install PySide
+#----------------------------------------------
+
+RUN wget http://download.qt-project.org/official_releases/pyside/pyside-qt4.8+1.2.2.tar.bz2 -P /tmp &&\
+    wget http://download.qt-project.org/official_releases/pyside/shiboken-1.2.2.tar.bz2 -P /tmp &&\
+    wget https://github.com/PySide/Tools/archive/0.2.15.tar.gz -P /tmp;
+
+ENV PYTHON_VERSION 2.7
+
+RUN cd /tmp &&\
+    tar -jxvf /tmp/pyside-qt4.8+1.2.2.tar.bz2 &&\
+    tar -jxvf /tmp/shiboken-1.2.2.tar.bz2  &&\
+    tar -zxvf /tmp/0.2.15.tar.gz &&\
+    cd /tmp/shiboken-1.2.2 &&\
+    rm -f build &&\
+    mkdir build &&\
+    cd build &&\
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPYTHON_SITE_PACKAGES=$BUILD_DIR/python \
+        -DCMAKE_INSTALL_PREFIX=$BUILD_DIR \
+        -DPYTHON_EXECUTABLE=$BUILD_DIR/bin/python \
+        -DCMAKE_PREFIX_PATH=$BUILD_DIR \
+        -DPYTHON_INCLUDE_DIR=$BUILD_DIR/include/python$PYTHON_VERSION &&\
+    make clean && \
+    make VERBOSE=1 -j ${BUILD_PROCS} &&\
+    make install &&\
+    cd /tmp/pyside-qt4.8+1.2.2 &&\
+    mkdir build &&\
+    cd build &&\
+    cmake \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D SITE_PACKAGE=$BUILD_DIR/python \
+        -D CMAKE_INSTALL_PREFIX=$BUILD_DIR \
+        -D ALTERNATIVE_QT_INCLUDE_DIR=$BUILD_DIR/include \
+        .. &&\
+    make clean && \
+    make VERBOSE=1 -j ${BUILD_PROCS} &&\
+    make install.
