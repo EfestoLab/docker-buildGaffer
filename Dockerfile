@@ -270,7 +270,53 @@ RUN cd /tmp &&\
     make && \
     make install
 
+#----------------------------------------------
+# build and install LLVM
+#http://www.linuxfromscratch.org/blfs/view/7.5/general/llvm.html
+#----------------------------------------------
+ENV CXX g++
+ENV CC gcc
+ENV REQUIRES_RTTI 1
+RUN wget http://llvm.org/releases/3.4/llvm-3.4.src.tar.gz -P /tmp && \
+    wget http://llvm.org/releases/3.4/clang-3.4.src.tar.gz -P /tmp && \
+    wget http://llvm.org/releases/3.4/compiler-rt-3.4.src.tar.gz -P /tmp
 
+RUN cd /tmp &&\
+    tar -zxvf /tmp/llvm-3.4.src.tar.gz &&\
+    cd llvm-3.4 &&\
+    tar -xf ../clang-3.4.src.tar.gz -C tools && \
+    tar -xf ../compiler-rt-3.4.src.tar.gz -C projects && \
+    mv tools/clang-3.4 tools/clang &&\
+    mv projects/compiler-rt-3.4 projects/compiler-rt &&\
+    ./configure \
+        --prefix=$BUILD_DIR \
+        --enable-shared \
+        --enable-optimized \
+        --enable-assertions=no &&\
+    make VERBOSE=1 -j ${BUILD_PROCS} && \
+    make install
+
+
+#----------------------------------------------
+# build and install OSL
+#----------------------------------------------
+RUN wget -c https://github.com/imageworks/OpenShadingLanguage/archive/Release-1.6.8.tar.gz -P /tmp
+ENV DYLD_LIBRARY_PATH $BUILD_DIR/lib
+ENV LD_LIBRARY_PATH $BUILD_DIR/lib
+RUN cd /tmp &&\
+    tar -zxvf /tmp/Release-1.6.8.tar.gz &&\
+    cd OpenShadingLanguage-Release-1.6.8 &&\
+    mkdir -p gafferBuild &&\
+    cd gafferBuild &&\
+    rm -f CMakeCache.txt && \
+    cmake \
+    -D ENABLERTTI=1 \
+    -D CMAKE_INSTALL_PREFIX=$BUILD_DIR \
+    -D CMAKE_PREFIX_PATH=$BUILD_DIR \
+    -D STOP_ON_WARNING=0 \
+    .. &&\
+    make && \
+    make install
 
 
 
