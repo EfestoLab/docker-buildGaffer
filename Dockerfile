@@ -26,7 +26,7 @@
 # imageworks-OpenColorIO-8883824
 # imageworks-OpenColorIO-Configs-f931d77
 
-FROM centos:7
+FROM centos:6
 MAINTAINER Efesto Lab LTD version: 0.1
 
 ENV OUT_FOLDER vfxlib
@@ -34,7 +34,7 @@ ENV BUILD_PROCS 7
 ENV BUILD_DIR /opt/gafferDependencies
 ENV PATH $BUILD_DIR/bin:$PATH
 
-ENV LD_LIBRARY_PATH=$BUILD_DIR/lib
+ENV LD_LIBRARY_PATH=$BUILD_DIR/lib:$LD_LIBRARY_PATH
 
 # Add custom user
 RUN useradd vfx
@@ -46,11 +46,20 @@ RUN yum -y install \
     wget \
     cmake \
     openssl-devel \
-    sqlite-devel;
+    sqlite-devel \
+    glibc-devel.x86_64 \
+    glibc-devel.i686 \
+    libicu-devel\
+    wget \
+    git \
+    tar \
+    bzip2 \
+    bzip2-devel;
 
 
 # create build dir
 RUN mkdir -p $BUILD_DIR;
+
 
 #----------------------------------------------
 # build and install PYTHON
@@ -82,6 +91,7 @@ RUN cd /tmp && \
 #----------------------------------------------
 # build and install boost
 #----------------------------------------------
+ENV DYLD_FALLBACK_FRAMEWORK_PATH=$BUILD_DIR/lib
 RUN wget http://downloads.sourceforge.net/project/boost/boost/1.51.0/boost_1_51_0.tar.bz2 -P /tmp
 RUN cd /tmp &&\
     tar -jxvf /tmp/boost_1_51_0.tar.bz2 &&\
@@ -96,3 +106,108 @@ RUN cd /tmp &&\
         link=shared \
         threading=multi \
         install;
+
+#----------------------------------------------
+# build and install JPEG
+#----------------------------------------------
+RUN wget http://www.ijg.org/files/jpegsrc.v8c.tar.gz  -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/jpegsrc.v8c.tar.gz && \
+    cd /tmp/jpeg-8c && \
+    ./configure \
+        --prefix=$BUILD_DIR && \
+    make clean && \
+    make && \
+    make install;
+
+#----------------------------------------------
+# build and install TIFF
+#----------------------------------------------
+RUN wget http://libtiff.maptools.org/dl/tiff-3.8.2.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/tiff-3.8.2.tar.gz && \
+    cd /tmp/tiff-3.8.2 && \
+    ./configure \
+        --prefix=$BUILD_DIR && \
+        make clean && \
+        make && \
+        make install;
+
+#----------------------------------------------
+# build and install PNG
+#----------------------------------------------
+# this seems to be a slow ftp, better look for something faster once it works...
+
+RUN wget ftp://ftp.simplesystems.org/pub/libpng/png/src/history/libpng16/libpng-1.6.3.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/libpng-1.6.3.tar.gz && \
+    cd /tmp/libpng-1.6.3 && \
+    ./configure \
+        --prefix=$BUILD_DIR && \
+    make clean && \
+    make && \
+    make install;
+
+#----------------------------------------------
+# build and install Freetype
+#----------------------------------------------
+RUN wget http://download.savannah.gnu.org/releases/freetype/freetype-2.4.12.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/freetype-2.4.12.tar.gz && \
+    cd /tmp/freetype-2.4.12 && \
+    ./configure \
+        --prefix=$BUILD_DIR && \
+    make clean && \
+    make && \
+    make install;
+
+
+#----------------------------------------------
+# build and install TBB
+#----------------------------------------------
+ENV CXX gcc
+RUN wget https://www.threadingbuildingblocks.org/sites/default/files/software_releases/source/tbb42_20140601oss_src.tgz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/tbb42_20140601oss_src.tgz && \
+    cd /tmp/tbb42_20140601oss && \
+    make clean && \
+    make compiler=$CXX && \
+    cp build/*_release/*.so* $BUILD_DIR/lib;
+
+#----------------------------------------------
+# build and install OPENEXR
+#----------------------------------------------
+RUN wget http://download.savannah.nongnu.org/releases/openexr/openexr-2.1.0.tar.gz -P /tmp &&\
+    wget http://download.savannah.nongnu.org/releases/openexr/ilmbase-2.1.0.tar.gz -P /tmp;
+
+RUN cd /tmp &&\
+    tar -zxvf /tmp/ilmbase-2.1.0.tar.gz &&\
+    cd /tmp/ilmbase-2.1.0 &&\
+    ./configure \
+        CC=gcc \
+        CXX=g++ \
+        --prefix=$BUILD_DIR && \
+    make clean && \
+    make  -j ${BUILD_PROCS} && \
+    make install;
+
+RUN cd /tmp &&\
+    tar -zxvf /tmp/openexr-2.1.0.tar.gz &&\
+    cd /tmp/openexr-2.1.0 &&\
+    ./configure \
+        CC=gcc \
+        CXX=g++ \
+        --prefix=$BUILD_DIR && \
+    make clean && \
+    make  -j ${BUILD_PROCS} && \
+    make install;
+
+#----------------------------------------------
+# build and install FONTS
+#----------------------------------------------
+RUN wget http://ftp.gnome.org/pub/GNOME/sources/ttf-bitstream-vera/1.10/ttf-bitstream-vera-1.10.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/ttf-bitstream-vera-1.10.tar.gz &&\
+    cd /tmp/ttf-bitstream-vera-1.10 &&\
+    mkdir -p $BUILD_DIR/fonts && \
+    cp *.ttf $BUILD_DIR/fonts;
