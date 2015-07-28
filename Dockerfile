@@ -211,3 +211,46 @@ RUN cd /tmp &&\
     cd /tmp/ttf-bitstream-vera-1.10 &&\
     mkdir -p $BUILD_DIR/fonts && \
     cp *.ttf $BUILD_DIR/fonts;
+
+#----------------------------------------------
+# build and install GLEW
+#----------------------------------------------
+RUN yum install -y glut glut-devel libXmu-devel libXi-devel
+RUN wget http://downloads.sourceforge.net/project/glew/glew/1.7.0/glew-1.7.0.tgz -P /tmp
+RUN mkdir -p $BUILD_DIR/lib64/pkgconfig &&\
+    cd /tmp &&\
+    tar -zxvf /tmp/glew-1.7.0.tgz &&\
+    cd /tmp/glew-1.7.0 &&\
+    make clean && \
+    make install GLEW_DEST=$BUILD_DIR LIBDIR=$BUILD_DIR/lib;
+
+
+#----------------------------------------------
+# build and install OCIO
+#----------------------------------------------
+ENV CXX g++
+RUN wget https://github.com/imageworks/OpenColorIO/archive/v1.0.8.tar.gz -P /tmp
+RUN cd /tmp &&\
+    tar -zxvf /tmp/v1.0.8.tar.gz &&\
+    cd /tmp/OpenColorIO-1.0.8 &&\
+    cmake \
+        -DCMAKE_INSTALL_PREFIX=$BUILD_DIR \
+        -DOCIO_BUILD_TRUELIGHT=OFF \
+        -DOCIO_BUILD_APPS=OFF \
+        -DCMAKE_C_COMPILER=gcc \
+        -DCMAKE_CXX_COMPILER=g++ \
+        -DOCIO_BUILD_NUKE=OFF &&\
+    make clean && \
+    make -j ${BUILD_PROCS} && \
+    make install;
+
+RUN mkdir -p $BUILD_DIR/python &&\
+    mv $BUILD_DIR/lib/python*/site-packages/PyOpenColorIO* $BUILD_DIR/python
+
+RUN wget http://github.com/imageworks/OpenColorIO-Configs/archive/v1.0_r2.tar.gz -P /tmp
+RUN mkdir -p $BUILD_DIR/openColorIO &&\
+    cd /tmp &&\
+    tar -zxvf /tmp/v1.0_r2.tar.gz &&\
+    cd /tmp/OpenColorIO-Configs-1.0_r2 &&\
+    cp nuke-default/config.ocio $BUILD_DIR/openColorIO &&\
+    cp -r nuke-default/luts $BUILD_DIR/openColorIO;
