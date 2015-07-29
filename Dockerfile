@@ -538,50 +538,49 @@ RUN cd /tmp && \
 # # build and install PySide
 # #----------------------------------------------
 
-# RUN wget http://download.qt-project.org/official_releases/pyside/pyside-qt4.8+1.2.2.tar.bz2 -P /tmp &&\
-#     wget http://download.qt-project.org/official_releases/pyside/shiboken-1.2.2.tar.bz2 -P /tmp
+RUN wget http://download.qt-project.org/official_releases/pyside/pyside-qt4.8+1.2.2.tar.bz2 -P /tmp &&\
+    wget http://download.qt-project.org/official_releases/pyside/shiboken-1.2.2.tar.bz2 -P /tmp
 
-# ENV PYTHON_VERSION 2.7
+ENV PYTHON_VERSION 2.7
 
-# RUN cd /tmp &&\
-#     tar -jxvf /tmp/pyside-qt4.8+1.2.2.tar.bz2 &&\
-#     tar -jxvf /tmp/shiboken-1.2.2.tar.bz2 &&\
-#     cd /tmp/shiboken-1.2.2 &&\
-#     rm -f build &&\
-#     mkdir build &&\
-#     cd build &&\
-#     cmake .. \
-#         -DCMAKE_BUILD_TYPE=Release \
-#         -DPYTHON_SITE_PACKAGES=$BUILD_DIR/python \
-#         -DCMAKE_INSTALL_PREFIX=$BUILD_DIR \
-#         -DPYTHON_EXECUTABLE=$BUILD_DIR/bin/python \
-#         -DCMAKE_PREFIX_PATH=$BUILD_DIR \
-#         -DPYTHON_INCLUDE_DIR=$BUILD_DIR/include/python$PYTHON_VERSION &&\
-#     make clean && \
-#     make VERBOSE=1 -j ${BUILD_PROCS} &&\
-#     make install &&\
-#     cd /tmp/pyside-qt4.8+1.2.2 &&\
-#     rm -f build &&\
-#     mkdir build &&\
-#     cd build &&\
-#     cmake \
-#         -D CMAKE_BUILD_TYPE=Release \
-#         -D SITE_PACKAGE=$BUILD_DIR/python \
-#         -D CMAKE_INSTALL_PREFIX=$BUILD_DIR \
-#         -D ALTERNATIVE_QT_INCLUDE_DIR=$BUILD_DIR/include \
-#         .. &&\
-#     make clean && \
-#     make VERBOSE=1 -j ${BUILD_PROCS} &&\
-#     make install.
-
+RUN cd /tmp &&\
+    tar -jxvf /tmp/pyside-qt4.8+1.2.2.tar.bz2 &&\
+    tar -jxvf /tmp/shiboken-1.2.2.tar.bz2 &&\
+    cd /tmp/shiboken-1.2.2 &&\
+    rm -f build &&\
+    mkdir build &&\
+    cd build &&\
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPYTHON_SITE_PACKAGES=$BUILD_DIR/python \
+        -DCMAKE_INSTALL_PREFIX=$BUILD_DIR \
+        -DPYTHON_EXECUTABLE=$BUILD_DIR/bin/python \
+        -DCMAKE_PREFIX_PATH=$BUILD_DIR \
+        -DPYTHON_INCLUDE_DIR=$BUILD_DIR/include/python$PYTHON_VERSION &&\
+    make clean && \
+    make VERBOSE=1 -j ${BUILD_PROCS} &&\
+    make install &&\
+    cd /tmp/pyside-qt4.8+1.2.2 &&\
+    rm -f build &&\
+    mkdir build &&\
+    cd build &&\
+    cmake \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D SITE_PACKAGE=$BUILD_DIR/python \
+        -D CMAKE_INSTALL_PREFIX=$BUILD_DIR \
+        -D ALTERNATIVE_QT_INCLUDE_DIR=$BUILD_DIR/include \
+        .. &&\
+    make clean && \
+    make VERBOSE=1 -j ${BUILD_PROCS} &&\
+    make install;
 
 # #----------------------------------------------
 # # build and install Gaffer
 # #----------------------------------------------
-# RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer
-#     cd /tmp/gaffer &&\
-#     git checkout 0.15.0.0 &&\
-#     scons BUILD_DIR=<BUILD_DIR> build
+RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer &&\
+    cd /tmp/gaffer &&\
+    git checkout 0.15.0.0 &&\
+    scons BUILD_DIR=$BUILD_DIR build
 
 
 # #----------------------------------------------
