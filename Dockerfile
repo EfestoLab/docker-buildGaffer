@@ -2,8 +2,8 @@
 # Dockerfile to build gafferDependencies
 # Based on centos6
 
-# BUILD WITH : sudo docker build -t <your_namespace>/gafferDependencies .
-# RUN WITH: docker run --rm -it -v `pwd`/volume:/vfxlib <your_namespace>/gafferDependencies
+# BUILD WITH : sudo docker build -t <your_namespace>/gaffer .
+# RUN WITH: docker run --rm -it -v `pwd`/volume:/gaffer <your_namespace>/gafferDependencies
 # All the libraries will be then available in ./volume
 
 # maintained by
@@ -49,15 +49,18 @@
 FROM centos:6
 MAINTAINER Efesto Lab LTD version: 0.1
 
-ENV OUT_FOLDER vfxlib
+ENV GAFFER_VERSION 0.15.0.0
+
+ENV OUT_FOLDER gaffer
 ENV BUILD_PROCS 7
-ENV BUILD_DIR /opt/gafferDependencies
+ENV BUILD_DIR /opt/gaffer-${GAFFER_VERSION}
+
 ENV PATH $BUILD_DIR/bin:$PATH
 
 ENV LD_LIBRARY_PATH=$BUILD_DIR/lib:$LD_LIBRARY_PATH
 
 # Add custom user
-RUN useradd vfx
+RUN useradd gaffer
 
 # basic tools
 RUN yum -y update
@@ -82,7 +85,6 @@ RUN yum -y install \
 
 # create build dir
 RUN mkdir -p $BUILD_DIR;
-
 
 #----------------------------------------------
 # build and install PYTHON
@@ -197,7 +199,7 @@ RUN cd /tmp &&\
     make clean && \
     make compiler=$CXX && \
     cp build/*_release/*.so* $BUILD_DIR/lib &&\
-    cp -R include/* /opt/gafferDependencies/include/;
+    cp -R include/* $BUILD_DIR/include/;
 
 #----------------------------------------------
 # build and install OPENEXR
@@ -589,6 +591,6 @@ RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer &&\
 # #----------------------------------------------
 # # prepare the output
 # #----------------------------------------------
-RUN chown -R vfx:vfx /opt
+RUN chown -R gaffer:gaffer /opt
 VOLUME /$OUT_FOLDER
 CMD cp -Rf -v /opt/* /$OUT_FOLDER && bash
