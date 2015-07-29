@@ -502,17 +502,34 @@ RUN cd /tmp &&\
 #----------------------------------------------
 # build and install Qt
 #----------------------------------------------
+ENV LD_LIBRARY_PATH $BUILD_DIR/lib
+ENV DYLD_FRAMEWORK_PATH $BUILD_DIR/lib
+
 RUN wget http://download.qt.io/archive/qt/4.8/4.8.5/qt-everywhere-opensource-src-4.8.5.tar.gz -P /tmp ;
 RUN cd /tmp && \
     tar -zxvf qt-everywhere-opensource-src-4.8.5.tar.gz && \
     cd qt-everywhere-opensource-src-4.8.5 && \
     ./configure \
         -prefix $BUILD_DIR \
-        -opensource -confirm-license \
-        -no-rpath -no-declarative -no-gtkstyle -no-qt3support \
-        -no-multimedia -no-audio-backend -no-webkit -no-script -no-dbus -no-declarative -no-svg \
-        -nomake examples -nomake demos -nomake tools \
-        -I $BUILD_DIR/include -L $BUILD_DIR/lib &&\
+        -opensource \
+        -confirm-license \
+        -no-rpath \
+        -no-declarative \
+        -no-gtkstyle \
+        -no-qt3support \
+        -no-multimedia \
+        -no-audio-backend \
+        -no-webkit \
+        -no-script \
+        -no-dbus \
+        -no-declarative \
+        -no-svg \
+        -nomake examples \
+        -nomake demos \
+        -nomake tools \
+        -I $BUILD_DIR/include \
+        -I $BUILD_DIR/include/freetype2 \
+        -L $BUILD_DIR/lib &&\
     make -j ${BUILD_PROCS} && \
     make install
 
