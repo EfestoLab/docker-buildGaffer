@@ -459,6 +459,7 @@ RUN git clone https://github.com/ImageEngine/cortex.git /tmp/cortex &&\
 
 RUN yum -y install scons
 ENV LD_LIBRARY_PATH $BUILD_DIR/lib
+RUN wget http://johanneskopf.de/publications/blue_noise/tilesets/tileset_2048.dat -P $BUILD_DIR/resources/cortex
 
 RUN cd /tmp/cortex &&\
     rm -rf .sconsign.dblite .sconf_temp &&\
