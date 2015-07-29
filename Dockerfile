@@ -43,7 +43,7 @@
 # https://github.com/johnhaddon/gafferDependencies/tree/master/build
 
 # NOTE:
-# The build take long time, and around 4Gb of space.
+# The build take long time, and around 9Gb of space.
 # If the build hangs or crash try to lower BUILD_PROCS variable
 
 FROM centos:6
@@ -66,10 +66,13 @@ RUN yum -y install \
     wget \
     cmake \
     openssl-devel \
+    openssl \
     sqlite-devel \
+    sqlite \
     glibc-devel.x86_64 \
     glibc-devel.i686 \
     libicu-devel\
+    libicu \
     wget \
     git \
     tar \
@@ -586,6 +589,6 @@ RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer &&\
 # #----------------------------------------------
 # # prepare the output
 # #----------------------------------------------
-# RUN chown -R vfx:vfx /opt
-# VOLUME /$OUT_FOLDER
-# CMD cp -Rf -v /opt/* /$OUT_FOLDER && bash
+RUN chown -R vfx:vfx /opt
+VOLUME /$OUT_FOLDER
+CMD cp -Rf -v /opt/* /$OUT_FOLDER && bash
