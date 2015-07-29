@@ -110,7 +110,7 @@ RUN wget https://pypi.python.org/packages/source/s/subprocess32/subprocess32-3.2
 RUN cd /tmp && \
     tar -zxvf /tmp/subprocess32-3.2.6.tar.gz && \
     cd subprocess32-3.2.6 && \
-    python setup.py install;
+    $BUILD_DIR/bin/python setup.py install;
 
 
 #----------------------------------------------
@@ -450,8 +450,11 @@ RUN cd /tmp &&\
 #----------------------------------------------
 # build and install cortex
 #----------------------------------------------
-# TODO : Fix DELIGHT
 # TODO : Fix ARNOLD_ROOT
+
+# Download 3delight installation
+RUN wget -O 3delight-Linux-x86_64.tar.xz http://www.3delight.com/downloads/free/3delight-Linux-x86_64.tar.xz.php -P /tmp
+
 
 RUN git clone https://github.com/ImageEngine/cortex.git /tmp/cortex &&\
     cd /tmp/cortex &&\
@@ -600,7 +603,6 @@ RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer &&\
 # # manually copy some missing libs
 # #----------------------------------------------
 RUN cp /usr/lib64/libicu* $BUILD_DIR/lib
-
 
 # #----------------------------------------------
 # # prepare the output
