@@ -3,7 +3,7 @@
 # Based on centos6
 
 # BUILD WITH : sudo docker build -t <your_namespace>/gaffer .
-# RUN WITH: docker run --rm -it -v `pwd`/volume:/gaffer <your_namespace>/gafferDependencies
+# RUN WITH: docker run --rm -it -v `pwd`/volume:/gaffer <your_namespace>/gaffer
 # All the libraries will be then available in ./volume
 
 # maintained by
@@ -588,10 +588,17 @@ RUN cd /tmp &&\
 # #----------------------------------------------
 # # build and install Gaffer
 # #----------------------------------------------
+RUN yum -y install inkscape doxygen
 RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer &&\
     cd /tmp/gaffer &&\
     git checkout 0.15.0.0 &&\
     scons BUILD_DIR=$BUILD_DIR build
+
+
+# #----------------------------------------------
+# # manually copy some missing libs
+# #----------------------------------------------
+RUN cp /usr/lib64/libicu* $BUILD_DIR/lib
 
 
 # #----------------------------------------------
