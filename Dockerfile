@@ -1,5 +1,5 @@
 ############################################################
-# Dockerfile to build gafferDependencies
+# Dockerfile to build gaffer
 # Based on centos6
 
 # BUILD WITH : sudo docker build -t <your_namespace>/gaffer .
@@ -45,6 +45,7 @@
 # NOTE:
 # The build take long time, and around 9Gb of space.
 # If the build hangs or crash try to lower BUILD_PROCS variable
+
 
 FROM centos:6
 MAINTAINER Efesto Lab LTD version: 0.1
@@ -467,6 +468,7 @@ RUN wget http://johanneskopf.de/publications/blue_noise/tilesets/tileset_2048.da
 
 # set DELIGHT environment
 ENV DELIGHT /tmp/3delight-12.0.12-Linux-x86_64/3delight/Linux-x86_64
+ENV RMAN_ROOT $DELIGHT
 
 RUN cd /tmp/cortex &&\
     rm -rf .sconsign.dblite .sconf_temp &&\
@@ -600,7 +602,10 @@ RUN yum -y install inkscape doxygen
 RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer &&\
     cd /tmp/gaffer &&\
     git checkout 0.15.0.0 &&\
-    scons BUILD_DIR=$BUILD_DIR build
+    scons \
+        BUILD_DIR=$BUILD_DIR \
+        RMAN_ROOT=$RMAN_ROOT \
+        build
 
 
 # #----------------------------------------------

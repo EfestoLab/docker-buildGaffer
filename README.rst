@@ -1,5 +1,5 @@
-Gaffer Dependencies
-===================
+Gaffer Builder
+==============
 
 Dockerfile for building gaffer and its dependencies.
 
@@ -8,9 +8,9 @@ DockerFile
 
 Based on centos6
 
-BUILD WITH : sudo docker build -t <your_namespace>/gafferDependencies .
+BUILD WITH : sudo docker build -t <your_namespace>/gaffer .
 
-RUN WITH: docker run --rm -it -v `pwd`/volume:/vfxlib <your_namespace>/gafferDependencies
+RUN WITH: docker run --rm -it -v `pwd`/volume:/vfxlib <your_namespace>/gaffer
 
 All the libraries will be then available in ./volume
 
