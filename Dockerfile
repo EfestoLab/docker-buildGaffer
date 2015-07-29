@@ -4,7 +4,7 @@
 
 # BUILD WITH : sudo docker build -t <your_namespace>/gaffer .
 # RUN WITH: docker run --rm -it -v `pwd`/volume:/gaffer <your_namespace>/gaffer
-# All the libraries will be then available in ./volume
+# The build will then be available in ./volume/gaffer-${GAFFER_VERSION}
 
 # maintained by
 # http://www.efestolab.uk
@@ -453,8 +453,9 @@ RUN cd /tmp &&\
 # TODO : Fix ARNOLD_ROOT
 
 # Download 3delight installation
-RUN wget -O 3delight-Linux-x86_64.tar.xz http://www.3delight.com/downloads/free/3delight-Linux-x86_64.tar.xz.php -P /tmp
-
+RUN wget -O /tmp/3delight-Linux-x86_64.tar.xz http://www.3delight.com/downloads/free/3delight-Linux-x86_64.tar.xz.php
+RUN cd /tmp &&\
+    tar -xJf 3delight-Linux-x86_64.tar.xz
 
 RUN git clone https://github.com/ImageEngine/cortex.git /tmp/cortex &&\
     cd /tmp/cortex &&\
@@ -463,6 +464,9 @@ RUN git clone https://github.com/ImageEngine/cortex.git /tmp/cortex &&\
 RUN yum -y install scons
 ENV LD_LIBRARY_PATH $BUILD_DIR/lib
 RUN wget http://johanneskopf.de/publications/blue_noise/tilesets/tileset_2048.dat -P $BUILD_DIR/resources/cortex
+
+# set DELIGHT environment
+ENV DELIGHT /tmp/3delight-12.0.12-Linux-x86_64/3delight/Linux-x86_64
 
 RUN cd /tmp/cortex &&\
     rm -rf .sconsign.dblite .sconf_temp &&\
