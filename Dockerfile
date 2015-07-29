@@ -306,9 +306,15 @@ RUN cd /tmp &&\
 ENV CXX g++
 ENV CC gcc
 ENV REQUIRES_RTTI 1
-RUN wget http://llvm.org/releases/3.4/llvm-3.4.src.tar.gz -P /tmp && \
-    wget http://llvm.org/releases/3.4/clang-3.4.src.tar.gz -P /tmp && \
-    wget http://llvm.org/releases/3.4/compiler-rt-3.4.src.tar.gz -P /tmp
+
+# here a potential mirror if llvm is slow
+RUN wget ftp://ftp.osuosl.org/.1/blfs/conglomeration/llvm/llvm-3.4.src.tar.gz -P /tmp &&\
+    wget ftp://ftp.osuosl.org/.1/blfs/conglomeration/clang/clang-3.4.src.tar.gz -P /tmp &&\
+    wget ftp://ftp.osuosl.org/.1/blfs/conglomeration/compiler-rt/compiler-rt-3.4.src.tar.gz -P /tmp
+
+# RUN wget http://llvm.org/releases/3.4/llvm-3.4.src.tar.gz -P /tmp && \
+#     wget http://llvm.org/releases/3.4/clang-3.4.src.tar.gz -P /tmp && \
+#     wget http://llvm.org/releases/3.4/compiler-rt-3.4.src.tar.gz -P /tmp
 
 RUN cd /tmp &&\
     tar -zxvf /tmp/llvm-3.4.src.tar.gz &&\
