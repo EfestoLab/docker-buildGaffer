@@ -9,11 +9,15 @@ DockerFile
 Based on centos6
 
 BUILD WITH : sudo docker build -t <your_namespace>/gafferDependencies .
+
 RUN WITH: docker run --rm -it -v `pwd`/volume:/vfxlib <your_namespace>/gafferDependencies
+
 All the libraries will be then available in ./volume
 
-maintained by
+maintained by:
+
 http://www.efestolab.uk
+
 for informations : info@efestolab.uk
 
 BASED ON GAFFER 0.15.0
@@ -48,9 +52,11 @@ pyside-qt4.8+1.2.2
 references used for the build:
 ------------------------------
 https://github.com/danbethell/vfxbits/blob/master/cortex/download.bash
+
 https://github.com/johnhaddon/gafferDependencies/tree/master/build
 
 NOTE:
 -----
 The build take long time, and around 6.5Gb of space, it will also eat all your cookies.
+
 If the build hangs or crash try to lower BUILD_PROCS variable
