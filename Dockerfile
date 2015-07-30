@@ -611,8 +611,9 @@ RUN git clone https://github.com/ImageEngine/gaffer.git /tmp/gaffer &&\
 # #----------------------------------------------
 # # manually copy some missing libs
 # #----------------------------------------------
-RUN cp /usr/lib64/libicu* $BUILD_DIR/lib
-
+RUN cp /usr/lib64/libicu* $BUILD_DIR/lib &&\
+    cp /usr/lib64/libssl* $BUILD_DIR/lib &&\
+    cp /usr/lib64/libcrypto* $BUILD_DIR/lib
 # #----------------------------------------------
 # # prepare the output
 # #----------------------------------------------
