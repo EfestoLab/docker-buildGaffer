@@ -544,7 +544,6 @@ RUN cd /tmp && \
         -no-script \
         -no-dbus \
         -no-declarative \
-        -no-svg \
         -nomake examples \
         -nomake demos \
         -nomake tools \
